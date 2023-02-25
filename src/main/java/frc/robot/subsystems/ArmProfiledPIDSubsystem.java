@@ -12,9 +12,10 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import frc.constants.ArmConstants;
+import frc.constants.ArmTunable;
 import frc.board.ArmTab;
 
-public class ProfiledPIDArmSubsystem extends ProfiledPIDSubsystem {
+public class ArmProfiledPIDSubsystem extends ProfiledPIDSubsystem {
   /** Creates a new ProfiledPIDArmSubsystem. */
   private final ArmTab m_ArmTab;
   private final CANSparkMax m_rotationLeader = new CANSparkMax(ArmConstants.kRotationLeaderMotorPort, CANSparkMax.MotorType.kBrushless);
@@ -22,16 +23,15 @@ public class ProfiledPIDArmSubsystem extends ProfiledPIDSubsystem {
   private final RelativeEncoder m_rotationEncoder;
   private final RelativeEncoder m_rotationFollowerEncoder;
   private final ArmFeedforward m_ArmFeedforward;
+  private final ProfiledPIDController m_PIDController; 
   
-  public ProfiledPIDArmSubsystem() {
+  public ArmProfiledPIDSubsystem() {
     super(
         // The ProfiledPIDController used by the subsystem
         new ProfiledPIDController(
-          0.4,
-            0.0,
-            0.0,
+          ArmTunable.getRotateP(), ArmTunable.getRotateI(), ArmTunable.getRotateD(),
             // The motion profile constraints
-            new TrapezoidProfile.Constraints(80, 80)));
+            new TrapezoidProfile.Constraints(ArmTunable.rotateMaxVelocity, ArmTunable.rotateMaxAcceleration)));
 
          m_ArmFeedforward = new ArmFeedforward(ArmConstants.ArmRotationKs, ArmConstants.ArmRotationKg, ArmConstants.ArmRotationKv, ArmConstants.ArmRotationKa);
 
@@ -45,32 +45,38 @@ public class ProfiledPIDArmSubsystem extends ProfiledPIDSubsystem {
     
         m_rotationEncoder.setPositionConversionFactor(ArmConstants.ARM_ROTATION_POSITION_CONVERSION_FACTOR);
         m_rotationFollowerEncoder.setPositionConversionFactor(ArmConstants.ARM_ROTATION_POSITION_CONVERSION_FACTOR);
-        m_rotationLeader.burnFlash(); // Do we need to do this?
-        m_rotationFollower.burnFlash();
 
         setGoal(ArmConstants.kStowedAngle);
 
         m_ArmTab = ArmTab.getInstance();
+        m_PIDController = getController();
   }
 
   @Override
   public void periodic(){
     super.periodic();
     m_ArmTab.setArmAngle(getArmRotationDegrees());
-  }
+  //   m_PIDController.setPID(m_ArmTab.getRotkP(),
+  //                         m_ArmTab.getRotkI(), 
+  //                         m_ArmTab.getRotkD());
+   }
   
-  private double getArmRotationDegrees() {
+  private double getArmRotationDegrees() {  
     return getMeasurement();
   }
 
   @Override
   public void useOutput(double output, TrapezoidProfile.State setpoint) {
     // Use the output (and optionally the setpoint) here
-    // Calculate the feedforward from the sepoint
-    double feedforward = m_ArmFeedforward.calculate(setpoint.position, setpoint.velocity);
+
+    // Calculate the feedforward from the setpoint. 
+    // Note that sysid says to use horizontal as the reference position
+    //double feedforward = m_ArmFeedforward.calculate(setpoint.position - ArmConstants.ArmRotationAngleOffset, setpoint.velocity);
+    // FIXME: After PID tuning, add the feedforward back in
+    double feedforward = 0;
+
     // Add the feedforward to the PID output to get the motor output
     m_rotationLeader.setVoltage(output + feedforward);
-
   }
 
   public void resetToEncoderToStowedAngle(){
@@ -78,11 +84,16 @@ public class ProfiledPIDArmSubsystem extends ProfiledPIDSubsystem {
     m_rotationFollowerEncoder.setPosition(ArmConstants.kStowedAngle);
   }
 
-  public void manualArmRotateUp(){
+  public void manualArmRotate(double speed){
+    double position = getArmRotationDegrees();
     disable();
-    m_rotationLeader.set(0.1);
-
-
+    if ((speed > 0.0 && position < ArmConstants.kArmRotateMaxDegrees) ||
+        (speed < 0.0 && position > ArmConstants.kArmRotateMinDegrees)) {
+      m_rotationLeader.set(speed);
+    }
+    else {
+      m_rotationLeader.set(0.0);
+    }
   }
 
   public void manualDone(){
@@ -90,14 +101,15 @@ public class ProfiledPIDArmSubsystem extends ProfiledPIDSubsystem {
     setGoal(m_rotationEncoder.getPosition());
   }
 
-  public void manualArmRotateDown(){
-    disable();
-    m_rotationLeader.set(-.1);
-  }
-
   @Override
   public double getMeasurement() {
     // Return the process variable measurement here
     return m_rotationEncoder.getPosition();
   }
+
+  public void burnFlash() {
+    m_rotationLeader.burnFlash();
+    m_rotationFollower.burnFlash();
+  }
+
 }

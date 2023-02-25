@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import frc.constants.OIConstants;
+
 // Comment to force commit
 // Using "import static an.enum.or.constants.inner.class.*;" helps reduce verbosity
 // this replaces "DoubleSolenoid.Value.kForward" with just kForward
@@ -20,31 +22,55 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.board.GroundIntakeTab;
 import frc.constants.GroundIntakeConstants;
 
-public class GroundIntake extends SubsystemBase {
+public class GroundIntakeSubsystem extends SubsystemBase {
   private final CANSparkMax m_intakeMotor = new CANSparkMax(GroundIntakeConstants.kIntakeMotorPort, CANSparkMax.MotorType.kBrushless);
-  private final DoubleSolenoid m_intakeSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, GroundIntakeConstants.kPneumaticPortA, GroundIntakeConstants.kPneumaticPortB);
+  private final DoubleSolenoid m_intakeSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, GroundIntakeConstants.kPneumaticPortA, GroundIntakeConstants.kPneumaticPortB);
   private final RelativeEncoder m_intakeEncoder;
-  private double m_intakeSetSpeed = 0.0;
+  private double m_intakeSetSpeed = GroundIntakeConstants.kDefaultIntakeSpeed;
 
   private GroundIntakeTab m_GroundIntakeTab;
 
+  private OIConstants.GamePiece m_gamePiece = OIConstants.kDefaultGamePiece;
+
   /** Creates a new GroundIntake. */
-  public GroundIntake() {
+  public GroundIntakeSubsystem() {
     m_intakeEncoder = m_intakeMotor.getEncoder();
 
     m_GroundIntakeTab = GroundIntakeTab.getInstance();
     m_GroundIntakeTab.setIntakeSetSpeed(m_intakeSetSpeed);
     m_GroundIntakeTab.setIntakeSpeed(getIntakeVelocity());
+
+    m_gamePiece = OIConstants.kDefaultGamePiece;
 }
 
   public void deploy() {
-    m_intakeSolenoid.set(kForward); // FIXME: May have to swap pneumatics orientation
-    setIntakeSpeed(m_intakeSetSpeed);
+    m_intakeSolenoid.set(kForward);
+    if (m_gamePiece == OIConstants.GamePiece.CUBE) {
+      setIntakeSpeed(GroundIntakeConstants.kCubeIntakeSpeed);
+    } else if (m_gamePiece == OIConstants.GamePiece.CONE) {
+      setIntakeSpeed(GroundIntakeConstants.kConeIntakeSpeed);
+    }   
   }
 
   public void stow() {
-    m_intakeSolenoid.set(kReverse); // FIXME: May have to swap pneumatics orientation
+    m_intakeSolenoid.set(kReverse);
     stopIntake();
+  }
+
+  public void grasp() {
+    if (m_gamePiece == OIConstants.GamePiece.CUBE) {
+      setIntakeSpeed(GroundIntakeConstants.kCubeGraspSpeed);
+    } else if (m_gamePiece == OIConstants.GamePiece.CONE) {
+      setIntakeSpeed(GroundIntakeConstants.kConeGraspSpeed);
+    }   
+  }
+
+  public void eject() {
+    if (m_gamePiece == OIConstants.GamePiece.CUBE) {
+      setIntakeSpeed(GroundIntakeConstants.kCubeEjectSpeed);
+    } else if (m_gamePiece == OIConstants.GamePiece.CONE) {
+      setIntakeSpeed(GroundIntakeConstants.kConeEjectSpeed);
+    }   
   }
 
   public double getIntakeVelocity() {
@@ -67,4 +93,13 @@ public class GroundIntake extends SubsystemBase {
     m_GroundIntakeTab.setIntakeSpeed(getIntakeVelocity());
     m_intakeSetSpeed = m_GroundIntakeTab.getIntakeSetSpeed();
   }
+
+  public void setGamePiece(OIConstants.GamePiece gamePiece) {
+    m_gamePiece = gamePiece;
+  }
+
+  public void burnFlash() {
+    m_intakeMotor.burnFlash();
+  }
+
 }

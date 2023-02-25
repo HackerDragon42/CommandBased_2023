@@ -16,6 +16,7 @@ FRC Robot 2023 Java Code: Command-Based framework
 * Pneumatic Actuator for open/close
 * 1x CANbus/Talon controlled for intake/eject gamepiece
 * [CTRE CANTalon Vendor Library](https://maven.ctr-electronics.com/release/com/ctre/phoenix/Phoenix5-frc2023-latest.json)
+* [Playing With Fusion Vendor Library](https://www.playingwithfusion.com/frc/playingwithfusion2023.json)
 
 #### GroundIntake
 * Pneumatic controlled extend/retract
@@ -79,3 +80,85 @@ processResources {
 }
 
 ```
+### Todo List
+`ArmConstants.java`  
+- [ ] Tune ManualArm Tele Max
+- [ ] Tune ManualArm Tele Min
+- [ ] Tune ManualArm Tele Speed
+- [ ] Tune ManualArm Rotate Max
+- [ ] Tune ManualArm Rotate Min
+- [ ] Tune ManualArm Rotate Speed
+- [ ] Tune AutoArm High Score Angle
+- [ ] Tune AutoArm Med Score Angle
+- [ ] Tune AutoArm Low Score Angle
+- [ ] Tune AutoArm Med Retrieve Angle
+- [ ] Tune AutoArm Low Retrieve Angle
+- [ ] Tune AutoArm High Score Position
+- [ ] Tune AutoArm Med Score Position
+- [ ] Tune AutoArm Low Score Position
+- [ ] Tune AutoArm Med Retrieve Position
+- [ ] Tune AutoArm Low Retrieve Position  
+
+`GroundIntakeConstants.java`  
+- [ ] Tune kConeIntakeSpeed
+- [ ] Tune kConeEjectSpeed
+- [ ] Tune kCubeIntakeSpeed
+- [ ] Tune kCubeEjectSpeed 
+- [ ] Tune kConeGraspSpeed 
+- [ ] Tune kCubeGraspSpeed  
+
+`Claw`
+- [ ] Add tof sensor hardware
+- [ ] Add tof to claw motor control
+
+`Robot Controller UI`  
+- [ ] Test ManualArmUpDown
+- [ ] Test ManualArmExtendRetract
+- [ ] Test ManualRollerOut
+- [ ] Test ManualRollerIn
+- [ ] Test AllStow  
+- [ ] Test ManualClawOpen
+- [ ] Test ManualClawClose
+
+`_Cube`
+- [ ] Test ArmScore 
+- [ ] Test AutoArmScoreHigh
+- [ ] Test AutoArmScoreMedium
+- [ ] Test AutoArmScoreLow
+- [ ] Test GamePieceToggle
+- [ ] Test IntakeRetrieve
+- [ ] Test IntakeGrasp
+- [ ] Test IntakeScore
+- [ ] Test AutoArmRetrieveMedium
+- [ ] Test AutoArmRetrieveLow
+
+`_Cone`
+- [ ] Test ArmScore 
+- [ ] Test AutoArmScoreHigh
+- [ ] Test AutoArmScoreMedium
+- [ ] Test AutoArmScoreLow
+- [ ] Test GamePieceToggle
+- [ ] Test IntakeRetrieve
+- [ ] Test IntakeGrasp
+- [ ] Test IntakeScore
+- [ ] Test AutoArmRetrieveMedium
+- [ ] Test AutoArmRetrieveLow
+
+`DriveTrain`
+- [ ] Get sysId after ballast is finalized
+- [ ] Save sysId values to `DriveConstants.java`
+- [ ] Test AutoDrive `curvy path`
+- [ ] Test AutoDrive `straight`
+- [ ] Test AutoDrive `Short Straight path`
+- [ ] Test AutoDrive `more curvy path`
+- [ ] Test with AprilTags
+- [ ] Add Field display to Shuffleboard
+
+`LEDs`
+- [ ] Add one or two strings to robot
+- [ ] If needed, add SW support for second string
+
+`User Interface`
+- [ ] Update XBox button mappings for missing functionality
+- [ ] Add Robot Control device box
+- [ ] Create mappings for Robot Control device
